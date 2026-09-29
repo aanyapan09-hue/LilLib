@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>My Lil' Library</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Silkscreen:wght@400;700&family=VT323&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --u: 4px;
+            --ink: #4538e8;
+            --wall: #7289ff;
+            --sky: #9fcbff;
+            --hot: #ff4bb5;
+            --blush: #ffb3fc;
+            --paper: #ffffff;
+            --brick-img: none;
+            --speck-img: none;
+            --f-head: 'Silkscreen', 'Courier New', monospace;
+            --f-body: 'VT323', 'Courier New', monospace;
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        [hidden] {
+            display: none !important
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%
+        }
+
+        html:has(dialog[open]) {
+            overflow: hidden
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--sky);
+            color: var(--ink);
+            font: 22px/1.15 var(--f-body);
+            padding: calc(20px + env(safe-area-inset-top, 0px)) 14px calc(48px + env(safe-area-inset-bottom, 0px));
+        }
+
+        h1,
+        h2,
+        p {
+            margin: 0
+        }
+
+        button {
+            font: inherit;
+            color: inherit
+        }
+
+        :focus-visible {
+            outline: 4px solid var(--hot);
+            outline-offset: 6px
+        }
+
+        /* pixel-cornered outline: four hard shadows, no border-radius */
+        .px {
+            box-shadow:
+                0 calc(var(--u) * -1) 0 0 var(--ink),
+                0 var(--u) 0 0 var(--ink),
+                calc(var(--u) * -1) 0 0 0 var(--ink),
+                var(--u) 0 0 0 var(--ink);
+        }
+
+        /* window */
+        .window {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: var(--paper)
+        }
+
+        .titlebar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 14px 16px;
+            border-bottom: 4px solid var(--ink)
+        }
+
+        .gems {
+            display: flex;
+            gap: 10px;
+            flex: none
+        }
+
+        .gems i {
+            display: block;
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--paper) 50%, var(--hot) 50%)
+        }
+
+        .gems i {
+            box-shadow: 0 -4px 0 var(--ink), 0 4px 0 var(--ink), -4px 0 0 var(--ink), 4px 0 0 var(--ink)
+        }
+
+        .titlebar h1 {
+            flex: 1;
+            min-width: 0;
+            font: 700 clamp(13px, 3.2vw, 22px)/1.2 var(--f-head);
+            letter-spacing: .06em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .tb-right {
+            display: flex;
+            gap: 14px;
+            flex: none
+        }
+
+        .tb-btn {
+            background: none;
+            border: 0;
+            padding: 6px;
+            cursor: pointer;
+            line-height: 0
+        }
+
+        .tb-btn:hover {
+            background: var(--sky)
+        }
+
+        .bars {
+            display: block;
+            width: 28px;
+            height: 4px;
+            background: var(--ink);
+            box-shadow: 0 -8px 0 var(--ink), 0 8px 0 var(--ink);
+            margin: 10px 0
+        }
+
+        .frame {
+            padding: 12px
+        }
+
+        .room {
+            background: var(--blush)
+        }
+
+        /* wall */
+        .wall {
+            position: relative;
+            overflow: hidden;
+            padding: 36px 16px 44px;
+            background-color: var(--wall);
+            background-image: var(--brick-img);
+            background-size: 96px 64px;
+        }
+
+        .wall>* {
+            position: relative;
+            z-index: 1
+        }
+
+        .wall>.spark {
+            position: absolute;
+            z-index: 0
+        }
+
+        .spark {
+            width: 4px;
+            height: 4px;
+            background: #fff;
+            box-shadow: 4px 0 #fff, -4px 0 #fff, 0 4px #fff, 0 -4px #fff
+        }
+
+        .spark.dot {
+            box-shadow: none
+        }
+
+        .spark.tw {
+            animation: tw 2.6s steps(2) infinite
+        }
+
+        @keyframes tw {
+            50% {
+                opacity: .15
+            }
+        }
+
+        .finder {
+            max-width: 680px;
+            margin: 0 auto;
+            background: var(--paper);
+            padding: 18px
+        }
+
+        .finder form {
+            display: flex;
+            gap: 14px
+        }
+
+        .finder .in {
+            flex: 1;
+            min-width: 0
+        }
+
+        .hint {
+            margin-top: 12px;
+            font-size: 20px
+        }
+
+        #results {
+            max-width: 880px;
+            margin: 32px auto 0
+        }
+
+        .res {
+            background: var(--paper);
+            padding: 18px
+        }
+
+        .res-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px
+        }
+
+        .res-head h2 {
+            font: 700 14px/1.3 var(--f-head);
+            letter-spacing: .04em;
+            overflow-wrap: anywhere
+        }
+
+        .res-foot {
+            margin-top: 14px
+        }
+
+        .msg {
+            padding: 8px 0 4px;
+            font-size: 24px
+        }
+
+        .rgrid {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(116px, 1fr));
+            gap: 14px 10px
+        }
+
+        .result {
+            display: block;
+            width: 100%;
+            background: none;
+            border: 0;
+            padding: 6px;
+            text-align: left;
+            cursor: pointer
+        }
+
+        .result .book {
+            margin: 4px 0 12px
+        }
+
+        .result:hover .book {
+            transform: translateY(-4px)
+        }
+
+        .result:hover .r-title {
+            text-decoration: underline
+        }
+
+        .r-title,
+        .r-author {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            overflow-wrap: anywhere
+        }
+
+        .r-title {
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            font-size: 22px;
+            line-height: 1
+        }
+
+        .r-author {
+            -webkit-line-clamp: 1;
+            line-clamp: 1;
+            margin-top: 3px
+        }
+
+        /* floor + shelves */
+        .floor {
+            border-top: 4px solid var(--ink);
+            padding: 28px 16px 12px;
+            background-color: var(--blush);
+            background-image: var(--speck-img);
+            background-size: 240px 240px;
+        }
+
+        .case {
+            background: var(--hot);
+            padding: 16px;
+            margin: 0 4px 32px
+        }
+
+        .case-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            background: var(--paper);
+            padding: 10px 14px;
+            margin-bottom: 18px
+        }
+
+        .case-head h2 {
+            font: 700 14px/1.2 var(--f-head);
+            letter-spacing: .05em;
+            overflow-wrap: anywhere
+        }
+
+        .count {
+            font: 400 12px/1 var(--f-head);
+            white-space: nowrap
+        }
+
+        .cavity {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 22px 16px;
+            align-items: flex-start;
+            min-height: 150px;
+            padding: 10px 16px 12px;
+            background-color: var(--wall);
+            background-image: repeating-linear-gradient(to bottom, transparent 0 138px, var(--ink) 138px 142px, var(--hot) 142px 150px);
+            box-shadow:
+                0 -4px 0 0 var(--ink), 0 4px 0 0 var(--ink), -4px 0 0 0 var(--ink), 4px 0 0 0 var(--ink),
+                inset 0 8px 0 0 rgba(20, 10, 90, .22);
+        }
+
+        .empty {
+            margin-top: 34px;
+            background: var(--paper);
+            padding: 8px 14px
+        }
+
+        .book {
+            position: relative;
+            flex: none;
+            display: block;
+            width: 88px;
+            height: 128px;
+            padding: 0;
+            border: 0;
+            background: var(--sky);
+            color: var(--ink);
+            overflow: visible
+        }
+
+        .book::after {
+            content: "";
+            position: absolute;
+            left: 6px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(255, 255, 255, .4);
+            pointer-events: none
+        }
+
+        button.book {
+            cursor: pointer;
+            transition: transform .09s steps(3)
+        }
+
+        button.book:hover {
+            transform: translateY(-6px)
+        }
+
+        .book.big {
+            width: 120px;
+            height: 176px
+        }
+
+        .book img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover
+        }
+
+        .nocover {
+            width: 100%;
+            height: 100%;
+            border-left: 14px solid var(--hot);
+            padding: 8px 6px;
+            overflow: hidden;
+            background: var(--sky);
+            font: 400 10px/1.3 var(--f-head);
+            text-align: left;
+            overflow-wrap: anywhere
+        }
+
+        .big .nocover {
+            font-size: 12px;
+            padding: 12px 8px
+        }
+
+        .chip {
+            position: absolute;
+            left: 6px;
+            bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--paper);
+            color: var(--ink);
+            font: 700 10px/1 var(--f-head);
+            padding: 4px 5px;
+            z-index: 1
+        }
+
+        .chip .pxi {
+            width: 14px;
+            height: 14px
+        }
+
+        .fresh {
+            animation: pop .3s steps(2) 4
+        }
+
+        @keyframes pop {
+            50% {
+                transform: translateY(-10px)
+            }
+        }
+
+        /* stats */
+        .stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 22px 24px;
+            padding: 6px 4px 20px
+        }
+
+        .stat {
+            display: flex;
+            background: var(--paper);
+            min-height: 72px
+        }
+
+        .s-ic {
+            display: grid;
+            place-items: center;
+            width: 64px;
+            flex: none;
+            border-right: 4px solid var(--ink)
+        }
+
+        .s-main {
+            flex: 1;
+            min-width: 0;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 6px
+        }
+
+        .s-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            align-items: baseline
+        }
+
+        .s-lab {
+            font: 700 13px/1 var(--f-head);
+            letter-spacing: .05em
+        }
+
+        .s-val {
+            font-size: 24px;
+            line-height: 1
+        }
+
+        .bar {
+            position: relative;
+            height: 24px;
+            border: 4px solid var(--ink);
+            background: var(--paper)
+        }
+
+        .bar i {
+            display: block;
+            height: 100%;
+            background: var(--sky);
+            transition: width .4s steps(8)
+        }
+
+        .bar::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), var(--ink) calc(10% - 3px) 10%) top/100% 4px no-repeat,
+                repeating-linear-gradient(90deg, transparent 0 calc(10% - 3px), var(--ink) calc(10% - 3px) 10%) bottom/100% 4px no-repeat;
+        }
+
+        /* form bits */
+        .btn {
+            display: inline-block;
+            background: var(--paper);
+            color: var(--ink);
+            border: 0;
+            cursor: pointer;
+            font: 700 12px/1 var(--f-head);
+            letter-spacing: .05em;
+            padding: 13px 16px;
+        }
+
+        .btn:hover {
+            background: var(--sky)
+        }
+
+        .btn:active {
+            transform: translateY(2px)
+        }
+
+        .btn.primary {
+            background: var(--ink);
+            color: var(--paper)
+        }
+
+        .btn.primary:hover {
+            background: var(--paper);
+            color: var(--ink)
+        }
+
+        .btn.sm {
+            padding: 10px 11px;
+            font-size: 11px
+        }
+
+        .btn:disabled {
+            opacity: .4;
+            cursor: not-allowed
+        }
+
+        .btn:disabled:hover {
+            background: var(--paper)
+        }
+
+        .in {
+            display: block;
+            width: 100%;
+            border: 0;
+            border-radius: 0;
+            background: var(--paper);
+            color: var(--ink);
+            font: 22px/1.1 var(--f-body);
+            padding: 12px 14px;
+        }
+
+        .in::placeholder {
+            color: var(--ink);
+            opacity: .55
+        }
+
+        textarea.in {
+            resize: vertical;
+            min-height: 110px
+        }
+
+        /* dialogs */
+        dialog.dlg {
+            padding: 0;
+            border: 0;
+            background: var(--paper);
+            color: var(--ink);
+            width: min(580px, calc(100vw - 40px));
+            max-height: calc(100dvh - 40px);
+            overflow: auto;
+            margin: auto;
+        }
+
+        dialog.dlg::backdrop {
+            background: rgba(24, 12, 96, .6)
+        }
+
+        .dlg-in {
+            padding: 20px
+        }
+
+        .dlg-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px
+        }
+
+        .dlg-head h2 {
+            font: 700 15px/1.2 var(--f-head);
+            letter-spacing: .05em
+        }
+
+        .bgrid {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            gap: 22px;
+            margin-bottom: 22px
+        }
+
+        .b-title {
+            font-size: 30px;
+            line-height: 1;
+            overflow-wrap: anywhere
+        }
+
+        .b-author {
+            margin-top: 8px;
+            font-size: 23px
+        }
+
+        .b-year {
+            margin-top: 2px
+        }
+
+        .binfo .in {
+            margin: 8px 0 14px
+        }
+
+        .lbl {
+            display: block;
+            font: 700 12px/1 var(--f-head);
+            letter-spacing: .05em;
+            margin-bottom: 10px
+        }
+
+        .fld {
+            margin-bottom: 22px
+        }
+
+        .rate {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px 14px
+        }
+
+        .stars {
+            display: flex;
+            gap: 6px
+        }
+
+        .star {
+            background: none;
+            border: 0;
+            padding: 3px;
+            cursor: pointer;
+            line-height: 0
+        }
+
+        .star:hover {
+            background: var(--sky)
+        }
+
+        .rv {
+            font-size: 24px;
+            min-width: 5.5ch
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px
+        }
+
+        .setmsg {
+            min-height: 1.2em;
+            margin-bottom: 14px;
+            font-size: 24px
+        }
+
+        fieldset {
+            border: 0;
+            margin: 0 0 26px;
+            padding: 0;
+            min-width: 0
+        }
+
+        legend {
+            font: 700 12px/1 var(--f-head);
+            letter-spacing: .05em;
+            margin-bottom: 12px;
+            padding: 0
+        }
+
+        .note {
+            margin: 0 0 12px;
+            font-size: 21px
+        }
+
+        .themes {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px
+        }
+
+        .theme {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+            background: var(--paper);
+            border: 0;
+            padding: 12px;
+            cursor: pointer;
+            font: 700 11px/1 var(--f-head);
+            letter-spacing: .05em;
+            text-align: left
+        }
+
+        .theme:hover {
+            background: var(--sky)
+        }
+
+        .theme[aria-pressed="true"] {
+            background: var(--ink);
+            color: var(--paper)
+        }
+
+        .sw {
+            display: flex;
+            gap: 4px
+        }
+
+        .sw i {
+            display: block;
+            width: 20px;
+            height: 20px;
+            outline: 2px solid var(--paper)
+        }
+
+        .shelf-list {
+            list-style: none;
+            margin: 0 0 16px;
+            padding: 0;
+            display: grid;
+            gap: 16px
+        }
+
+        .shelf-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto auto;
+            gap: 10px;
+            align-items: center
+        }
+
+        .shelf-row .in {
+            padding: 10px 12px
+        }
+
+        .file {
+            position: relative
+        }
+
+        .file input {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%
+        }
+
+        .file:focus-within {
+            outline: 4px solid var(--hot);
+            outline-offset: 6px
+        }
+
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+            transform: translateX(-50%);
+            z-index: 50;
+            background: var(--paper);
+            padding: 12px 16px;
+            font: 700 12px/1.3 var(--f-head);
+            letter-spacing: .04em;
+            max-width: calc(100vw - 48px);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .toast.on {
+            opacity: 1
+        }
+
+        @media (max-width:640px) {
+            body {
+                padding-left: 10px;
+                padding-right: 10px
+            }
+
+            .stats {
+                grid-template-columns: 1fr
+            }
+
+            .wall {
+                padding: 28px 12px 36px
+            }
+
+            .finder form {
+                flex-direction: column
+            }
+
+            .floor {
+                padding: 24px 10px 8px
+            }
+
+            .case {
+                padding: 12px;
+                margin-left: 4px;
+                margin-right: 4px
+            }
+
+            .cavity {
+                padding-left: 12px;
+                padding-right: 12px;
+                gap: 22px 12px
+            }
+
+            .bgrid {
+                grid-template-columns: 1fr
+            }
+
+            .shelf-row {
+                grid-template-columns: 1fr 1fr 1fr
+            }
+
+            .shelf-row .in {
+                grid-column: 1/-1
+            }
+
+            .gems i {
+                width: 18px;
+                height: 18px
+            }
+        }
+
+        @media (prefers-reduced-motion:reduce) {
+
+            .spark.tw,
+            .fresh {
+                animation: none
+            }
+
+            button.book,
+            .bar i {
+                transition: none
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <noscript>This library needs JavaScript turned on.</noscript>
+
+    <div class="window px">
+        <header class="titlebar">
+            <div class="gems" aria-hidden="true"><i></i><i></i><i></i></div>
+            <h1 id="title"></h1>
+            <div class="tb-right">
+                <button type="button" class="tb-btn" id="fs" aria-label="Toggle full screen"></button>
+                <button type="button" class="tb-btn" id="menu" aria-label="Customize your library"><span
+                        class="bars"></span></button>
+            </div>
+        </header>
+
+        <div class="frame">
+            <div class="room px">
+                <section class="wall" id="wall" aria-label="Book search">
+                    <div class="finder px">
+                        <form id="search" role="search" autocomplete="off">
+                            <input id="q" class="in px" type="search" placeholder="Type a book title"
+                                aria-label="Book title or author" enterkeyhint="search">
+                            <button type="submit" class="btn primary px">Find it</button>
+                        </form>
+                        <p class="hint">Search by title or author. Cover art comes from Open Library.</p>
+                    </div>
+                    <div id="results" hidden></div>
+                </section>
+
+                <div class="floor">
+                    <div id="shelves"></div>
+                    <div class="stats" id="stats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <dialog id="bookDlg" class="dlg px" aria-label="Book details">
+        <div id="bookBody"></div>
+    </dialog>
+    <dialog id="setDlg" class="dlg px" aria-label="Customize your library">
+        <div id="setBody"></div>
+    </dialog>
+    <div class="toast px" id="toast" role="status" aria-live="polite"></div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            /* ---------- helpers ---------- */
+            const $ = (s, r = document) => r.querySelector(s);
+            const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4);
+            const clampInt = (v, lo, hi, d) => { v = parseInt(v, 10); return isNaN(v) ? d : Math.min(hi, Math.max(lo, v)); };
+            const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const DEFAULT_TITLE = "My Lil' Library";
+
+            /* ---------- themes ---------- */
+            const THEMES = {
+                bedroom: { name: 'Bedroom', ink: '#4538e8', wall: '#7289ff', sky: '#9fcbff', hot: '#ff4bb5', blush: '#ffb3fc' },
+                grape: { name: 'Grape', ink: '#3d1d78', wall: '#8f6be0', sky: '#d8c8ff', hot: '#ff5aa5', blush: '#ffd0f0' },
+                matcha: { name: 'Matcha', ink: '#1d5c4d', wall: '#6cc4a1', sky: '#bdeed6', hot: '#ff7f50', blush: '#ffe8a8' },
+                sunset: { name: 'Sunset', ink: '#7a1c48', wall: '#ff9b7a', sky: '#ffd9a8', hot: '#e6337a', blush: '#ffe4d6' }
+            };
+
+            function mulberry(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+            function makeTiles(t) {
+                const brick = `<svg xmlns='http://www.w3.org/2000/svg' width='96' height='64' shape-rendering='crispEdges'><g fill='${t.ink}'>` +
+                    `<rect x='0' y='0' width='96' height='4'/><rect x='0' y='32' width='96' height='4'/>` +
+                    `<rect x='0' y='0' width='4' height='32'/><rect x='48' y='0' width='4' height='32'/>` +
+                    `<rect x='24' y='32' width='4' height='32'/><rect x='72' y='32' width='4' height='32'/></g></svg>`;
+                const rnd = mulberry(11); let sp = '';
+                for (let i = 0; i < 16; i++) {
+                    const x = Math.floor(rnd() * 53) * 4, y = 4 + Math.floor(rnd() * 53) * 4;
+                    sp += `<rect x='${x}' y='${y}' width='4' height='4'/>`;
+                    if (rnd() > .4) sp += `<rect x='${x + 4}' y='${y - 4}' width='4' height='4'/><rect x='${x + 8}' y='${y}' width='4' height='4'/>`;
+                }
+                const specks = `<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240' shape-rendering='crispEdges'><g fill='${t.hot}'>${sp}</g></svg>`;
+                const r = document.documentElement.style;
+                r.setProperty('--brick-img', `url("data:image/svg+xml,${encodeURIComponent(brick)}")`);
+                r.setProperty('--speck-img', `url("data:image/svg+xml,${encodeURIComponent(specks)}")`);
+            }
+
+            function applyTheme() {
+                const t = THEMES[state.theme] || THEMES.bedroom;
+                const r = document.documentElement.style;
+                ['ink', 'wall', 'sky', 'hot', 'blush'].forEach(k => r.setProperty('--' + k, t[k]));
+                makeTiles(t);
+            }
+
+            /* ---------- pixel icons ---------- */
+            const FILL = { '#': 'var(--ink)', '+': 'var(--hot)', 'o': 'var(--sky)', 'w': 'var(--paper)' };
+            function pxIcon(rows, cell, fills) {
+                const h = rows.length, w = rows[0].length; let r = '';
+                rows.forEach((row, y) => { for (let x = 0; x < w; x++) { const c = fills[row[x]]; if (c) r += `<rect x="${x}" y="${y}" width="1" height="1" fill="${c}"/>`; } });
+                return `<svg class="pxi" viewBox="0 0 ${w} ${h}" width="${w * cell}" height="${h * cell}" shape-rendering="crispEdges" aria-hidden="true">${r}</svg>`;
+            }
+            const STAR = ["...#...", "..###..", "#######", ".#####.", "..###..", ".##.##.", ".#...#."];
+            const IC = {
+                book: ["#########", "#ooo#ooo#", "#ooo#ooo#", "#ooo#ooo#", "#########"],
+                pencil: ["....##.", "...#++#", "..#++#.", ".#++#..", "#oo#...", "##....."],
+                heart: [".##.##.", "#++#++#", "#+++++#", ".#+++#.", "..#+#..", "...#..."],
+                expand: ["###...###", "#.......#", "#.......#", ".........", ".........", ".........", "#.......#", "#.......#", "###...###"]
+            };
+            const starSVG = (px, on) => pxIcon(STAR, px / 7, { '#': on ? 'var(--hot)' : 'var(--sky)' });
+
+            /* ---------- state ---------- */
+            const KEY = 'lil-library-v1';
+            const DEFAULT = () => ({
+                title: DEFAULT_TITLE, theme: 'bedroom', goal: 24,
+                shelves: [{ id: 's1', name: 'To read' }, { id: 's2', name: 'Reading now' }, { id: 's3', name: 'Read' }, { id: 's4', name: 'Favorites' }],
+                books: []
+            });
+            function clean(o) {
+                const d = DEFAULT();
+                if (!o || typeof o !== 'object') return d;
+                const s = { title: String(o.title == null ? d.title : o.title).slice(0, 28), theme: THEMES[o.theme] ? o.theme : 'bedroom', goal: clampInt(o.goal, 1, 999, 24) };
+                s.shelves = (Array.isArray(o.shelves) && o.shelves.length)
+                    ? o.shelves.filter(x => x).map(x => ({ id: String(x.id || uid()), name: String(x.name || 'Shelf').slice(0, 30) }))
+                    : d.shelves;
+                if (!s.shelves.length) s.shelves = d.shelves;
+                const ids = new Set(s.shelves.map(x => x.id));
+                s.books = (Array.isArray(o.books) ? o.books : []).filter(b => b && b.title).map(b => ({
+                    id: String(b.id || uid()), key: String(b.key || uid()),
+                    title: String(b.title).slice(0, 200), author: String(b.author || '').slice(0, 200), year: b.year ? String(b.year).slice(0, 8) : '',
+                    coverUrl: /^https:\/\//.test(b.coverUrl || '') ? b.coverUrl : '',
+                    manual: !!b.manual, shelfId: ids.has(b.shelfId) ? b.shelfId : s.shelves[0].id,
+                    rating: clampInt(b.rating, 0, 5, 0), review: String(b.review || '').slice(0, 5000), added: +b.added || Date.now()
+                }));
+                return s;
+            }
+            let state;
+            try { state = clean(JSON.parse(localStorage.getItem(KEY) || 'null')); } catch (e) { state = clean(null); }
+            let warned = false;
+            function persist() {
+                try { localStorage.setItem(KEY, JSON.stringify(state)); }
+                catch (e) { if (!warned) { warned = true; toast('Saving is blocked in this browser. Use Backup in the menu to keep a copy.'); } }
+            }
+
+            /* ---------- toast ---------- */
+            let tt;
+            function toast(msg) {
+                const t = $('#toast'); t.textContent = msg; t.classList.add('on');
+                clearTimeout(tt); tt = setTimeout(() => t.classList.remove('on'), 2600);
+            }
+
+            /* ---------- covers ---------- */
+            const noCover = t => `<div class="nocover"><span>${esc(t)}</span></div>`;
+            const coverHTML = b => b.coverUrl
+                ? `<img class="cov" src="${esc(b.coverUrl)}" alt="" loading="lazy" data-t="${esc(b.title)}">`
+                : noCover(b.title);
+            document.addEventListener('error', e => {
+                const i = e.target;
+                if (i && i.tagName === 'IMG' && i.classList.contains('cov')) i.outerHTML = noCover(i.dataset.t);
+            }, true);
+
+            /* ---------- render ---------- */
+            function renderTitle() {
+                const t = state.title.trim() || DEFAULT_TITLE;
+                $('#title').textContent = t; document.title = t;
+            }
+            function bookBtn(b) {
+                const tip = b.title + (b.author ? ' by ' + b.author : '');
+                return `<button type="button" class="book px" data-book="${b.id}" title="${esc(tip)}" aria-label="${esc(tip)}">${coverHTML(b)}${b.rating ? `<span class="chip">${starSVG(14, true)}${b.rating}</span>` : ''}</button>`;
+            }
+            function renderShelves() {
+                $('#shelves').innerHTML = state.shelves.map(s => {
+                    const bs = state.books.filter(b => b.shelfId === s.id);
+                    return `<section class="case px" aria-label="${esc(s.name)}">
+      <header class="case-head px"><h2>${esc(s.name)}</h2><span class="count">${bs.length} book${bs.length === 1 ? '' : 's'}</span></header>
+      <div class="cavity">${bs.length ? bs.map(bookBtn).join('') : '<p class="empty px">Nothing here yet. Search a title above to fill this shelf.</p>'}</div>
+    </section>`;
+                }).join('');
+            }
+            function renderStats() {
+                const bs = state.books, total = bs.length, goal = state.goal;
+                const rated = bs.filter(b => b.rating > 0), reviewed = bs.filter(b => b.review && b.review.trim());
+                const avg = rated.length ? rated.reduce((a, b) => a + b.rating, 0) / rated.length : 0;
+                const rows = [
+                    { ic: pxIcon(IC.book, 4, FILL), lab: 'Books', val: `${total} / ${goal}`, p: total / goal },
+                    { ic: starSVG(28, true), lab: 'Rated', val: `${rated.length} / ${total}`, p: total ? rated.length / total : 0 },
+                    { ic: pxIcon(IC.pencil, 4, FILL), lab: 'Reviewed', val: `${reviewed.length} / ${total}`, p: total ? reviewed.length / total : 0 },
+                    { ic: pxIcon(IC.heart, 4, FILL), lab: 'Avg stars', val: rated.length ? avg.toFixed(1) + ' / 5' : 'none yet', p: avg / 5 }
+                ];
+                $('#stats').innerHTML = rows.map(r => {
+                    const p = Math.min(1, Math.max(0, r.p));
+                    const w = p === 0 ? 0 : Math.max(10, Math.round(p * 10) * 10);
+                    return `<div class="stat px"><div class="s-ic">${r.ic}</div><div class="s-main"><div class="s-row"><span class="s-lab">${r.lab}</span><span class="s-val">${r.val}</span></div><div class="bar" aria-hidden="true"><i style="width:${w}%"></i></div></div></div>`;
+                }).join('');
+            }
+            function render() { renderTitle(); renderShelves(); renderStats(); }
+
+            /* ---------- wall sparkles ---------- */
+            (function () {
+                const wall = $('#wall'), rnd = mulberry(7);
+                for (let i = 0; i < 16; i++) {
+                    const s = document.createElement('span');
+                    s.className = 'spark' + (rnd() > .55 ? ' dot' : '') + (i % 3 === 0 ? ' tw' : '');
+                    s.style.left = (2 + rnd() * 94).toFixed(1) + '%';
+                    s.style.top = (4 + rnd() * 90).toFixed(1) + '%';
+                    s.style.animationDelay = (rnd() * 2).toFixed(1) + 's';
+                    s.setAttribute('aria-hidden', 'true');
+                    wall.appendChild(s);
+                }
+            })();
+
+            /* ---------- search ---------- */
+            let ctrl = null, timer = null, lastResults = [], lastQuery = '';
+            function closeResults() { if (ctrl) ctrl.abort(); const r = $('#results'); r.hidden = true; r.innerHTML = ''; }
+            function showResults(status, term) {
+                lastQuery = term;
+                const box = $('#results'); box.hidden = false;
+                let inner;
+                if (status === 'loading') inner = '<p class="msg" role="status">Searching...</p>';
+                else if (status === 'error') inner = '<p class="msg" role="alert">Could not reach Open Library. Check your connection, then search again.</p>';
+                else if (!lastResults.length) inner = '<p class="msg">No matches. Try fewer words, or add it by hand.</p>';
+                else inner = '<ul class="rgrid">' + lastResults.map((r, i) => {
+                    const on = state.books.some(b => b.key === r.key);
+                    return `<li><button type="button" class="result" data-res="${i}"><span class="book px">${coverHTML(r)}${on ? '<span class="chip">On shelf</span>' : ''}</span><span class="r-title">${esc(r.title)}</span><span class="r-author">${esc(r.author || 'Unknown author')}</span></button></li>`;
+                }).join('') + '</ul>';
+                box.innerHTML = `<div class="res px"><div class="res-head"><h2>Results for &ldquo;${esc(term)}&rdquo;</h2><button type="button" class="btn px" data-act="close">Close</button></div>${inner}<div class="res-foot"><button type="button" class="btn px" data-act="manual">Can't find it? Add by hand</button></div></div>`;
+            }
+            async function runSearch(term) {
+                term = term.trim();
+                if (term.length < 2) { closeResults(); return; }
+                if (ctrl) ctrl.abort();
+                ctrl = new AbortController();
+                showResults('loading', term);
+                try {
+                    const url = 'https://openlibrary.org/search.json?q=' + encodeURIComponent(term) + '&limit=18&fields=key,title,author_name,cover_i,first_publish_year';
+                    const res = await fetch(url, { signal: ctrl.signal });
+                    if (!res.ok) throw new Error('bad status');
+                    const data = await res.json();
+                    lastResults = (data.docs || []).filter(d => d.title).map(d => ({
+                        key: d.key, title: d.title, author: (d.author_name || []).slice(0, 2).join(', '),
+                        year: d.first_publish_year ? String(d.first_publish_year) : '',
+                        coverUrl: d.cover_i ? `https://covers.openlibrary.org/b/id/${d.cover_i}-M.jpg` : ''
+                    }));
+                    showResults('done', term);
+                } catch (e) {
+                    if (e && e.name === 'AbortError') return;
+                    showResults('error', term);
+                }
+            }
+            $('#search').addEventListener('submit', e => { e.preventDefault(); clearTimeout(timer); runSearch($('#q').value); });
+            $('#q').addEventListener('input', () => {
+                clearTimeout(timer);
+                const v = $('#q').value;
+                if (v.trim().length < 2) { closeResults(); return; }
+                timer = setTimeout(() => runSearch(v), 550);
+            });
+            $('#results').addEventListener('click', e => {
+                const act = e.target.closest('[data-act]');
+                if (act) {
+                    if (act.dataset.act === 'close') closeResults();
+                    if (act.dataset.act === 'manual') openBook({ key: 'manual-' + uid(), title: lastQuery, author: '', year: '', coverUrl: '', manual: true });
+                    return;
+                }
+                const r = e.target.closest('[data-res]');
+                if (r) openBook(lastResults[+r.dataset.res]);
+            });
+            $('#shelves').addEventListener('click', e => {
+                const b = e.target.closest('[data-book]');
+                if (!b) return;
+                const bk = state.books.find(x => x.id === b.dataset.book);
+                if (bk) openBook(bk);
+            });
+
+            /* ---------- dialogs ---------- */
+            const bookDlg = $('#bookDlg'), setDlg = $('#setDlg');
+            [bookDlg, setDlg].forEach(d => d.addEventListener('click', e => { if (e.target === d) d.close(); }));
+
+            function starsRow(r) {
+                return [1, 2, 3, 4, 5].map(i =>
+                    `<button type="button" class="star" role="radio" aria-checked="${r === i}" aria-label="${i} star${i > 1 ? 's' : ''}" data-v="${i}" tabindex="${(r === i || (r === 0 && i === 1)) ? 0 : -1}">${starSVG(28, i <= r)}</button>`
+                ).join('');
+            }
+
+            function openBook(draft) {
+                const existing = state.books.find(b => b.key === draft.key);
+                const isNew = !existing;
+                const b = existing || Object.assign({ rating: 0, review: '', shelfId: state.shelves[0].id }, draft);
+                const manual = !!b.manual;
+                let rating = b.rating || 0;
+                const body = $('#bookBody');
+
+                body.innerHTML = `<div class="dlg-in">
+    <div class="dlg-head"><h2>${isNew ? 'Shelve this book' : 'On your shelf'}</h2><button type="button" class="btn px" data-x aria-label="Close">X</button></div>
+    <div class="bgrid">
+      <div><div class="book big px">${coverHTML(b)}</div></div>
+      <div class="binfo">${manual
+                        ? `<label class="lbl" for="mt">Title</label><input id="mt" class="in px" maxlength="200" value="${esc(b.title)}"><label class="lbl" for="ma">Author</label><input id="ma" class="in px" maxlength="200" value="${esc(b.author)}">`
+                        : `<p class="b-title">${esc(b.title)}</p><p class="b-author">${b.author ? 'by ' + esc(b.author) : 'Author unknown'}</p>${b.year ? `<p class="b-year">First published ${esc(b.year)}</p>` : ''}`}
+      </div>
+    </div>
+    <div class="fld">
+      <span class="lbl" id="rl">Your rating</span>
+      <div class="rate">
+        <div class="stars" id="stars" role="radiogroup" aria-labelledby="rl">${starsRow(rating)}</div>
+        <span class="rv" id="rv"></span>
+        <button type="button" class="btn sm px" id="clr">Clear</button>
+      </div>
+    </div>
+    <div class="fld"><label class="lbl" for="rev">Your review</label><textarea id="rev" class="in px" maxlength="5000" placeholder="What did you think?"></textarea></div>
+    <div class="fld"><label class="lbl" for="shf">Shelf</label><select id="shf" class="in px">${state.shelves.map(s => `<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select></div>
+    <div class="actions">
+      <button type="button" class="btn primary px" id="sv">${isNew ? 'Put on shelf' : 'Save changes'}</button>
+      <button type="button" class="btn px" data-x>Cancel</button>
+      ${isNew ? '' : '<button type="button" class="btn px" id="rm">Remove</button>'}
+    </div>
+  </div>`;
+
+                const stars = $('#stars', body), rv = $('#rv', body), clr = $('#clr', body);
+                $('#rev', body).value = b.review || '';
+                $('#shf', body).value = b.shelfId;
+
+                function setRating(v, kb) {
+                    rating = Math.min(5, Math.max(0, v));
+                    stars.innerHTML = starsRow(rating);
+                    rv.textContent = rating ? rating + ' / 5' : 'Not rated';
+                    clr.hidden = !rating;
+                    if (kb) { const f = stars.querySelector(`[data-v="${rating || 1}"]`); if (f) f.focus(); }
+                }
+                setRating(rating);
+
+                stars.addEventListener('click', e => { const s = e.target.closest('[data-v]'); if (s) setRating(+s.dataset.v); });
+                stars.addEventListener('keydown', e => {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { e.preventDefault(); setRating(rating + 1, true); }
+                    else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { e.preventDefault(); setRating(rating - 1, true); }
+                });
+                clr.addEventListener('click', () => setRating(0));
+                body.querySelectorAll('[data-x]').forEach(x => x.addEventListener('click', () => bookDlg.close()));
+
+                $('#sv', body).addEventListener('click', () => {
+                    const review = $('#rev', body).value.trim();
+                    const shelfId = $('#shf', body).value;
+                    let title = b.title, author = b.author;
+                    if (manual) {
+                        title = $('#mt', body).value.trim();
+                        author = $('#ma', body).value.trim();
+                        if (!title) { $('#mt', body).focus(); return; }
+                    }
+                    const shelfName = (state.shelves.find(s => s.id === shelfId) || {}).name || 'your shelf';
+                    let freshId = null;
+                    if (isNew) {
+                        const nb = { id: uid(), key: b.key || ('manual-' + uid()), title, author, year: b.year || '', coverUrl: b.coverUrl || '', manual, shelfId, rating, review, added: Date.now() };
+                        state.books.push(nb); freshId = nb.id;
+                        toast('Shelved on ' + shelfName + '.');
+                    } else {
+                        Object.assign(existing, { rating, review, shelfId });
+                        if (manual) { existing.title = title; existing.author = author; }
+                        toast('Saved.');
+                    }
+                    persist(); render(); bookDlg.close();
+                    if (freshId) {
+                        closeResults(); $('#q').value = '';
+                        const el = document.querySelector(`[data-book="${freshId}"]`);
+                        if (el) {
+                            el.scrollIntoView({ block: 'center', behavior: reduceMotion ? 'auto' : 'smooth' });
+                            el.classList.add('fresh');
+                        }
+                    }
+                });
+
+                const rm = $('#rm', body);
+                if (rm) rm.addEventListener('click', () => {
+                    if (!rm.dataset.armed) {
+                        rm.dataset.armed = '1'; rm.textContent = 'Really remove?';
+                        setTimeout(() => { if (rm.isConnected) { delete rm.dataset.armed; rm.textContent = 'Remove'; } }, 3000);
+                        return;
+                    }
+                    state.books = state.books.filter(x => x.id !== existing.id);
+                    persist(); render(); bookDlg.close(); toast('Removed.');
+                    if (!$('#results').hidden) showResults('done', lastQuery);
+                });
+
+                bookDlg.showModal();
+                bookDlg.scrollTop = 0;
+            }
+            bookDlg.addEventListener('close', () => { if (!$('#results').hidden && lastResults.length) showResults('done', lastQuery); });
+
+            /* ---------- settings ---------- */
+            function openSettings(msg) {
+                const body = $('#setBody');
+                const n = state.shelves.length;
+                body.innerHTML = `<div class="dlg-in">
+    <div class="dlg-head"><h2>Customize</h2><button type="button" class="btn px" data-x aria-label="Close">X</button></div>
+    <div class="setmsg" id="setmsg" role="status">${msg ? esc(msg) : ''}</div>
+
+    <fieldset>
+      <legend>Library name</legend>
+      <input id="nm" class="in px" maxlength="28" value="${esc(state.title)}" aria-label="Library name" placeholder="${esc(DEFAULT_TITLE)}">
+    </fieldset>
+
+    <fieldset>
+      <legend>Colors</legend>
+      <div class="themes">${Object.keys(THEMES).map(k => {
+                    const t = THEMES[k];
+                    return `<button type="button" class="theme px" data-theme="${k}" aria-pressed="${state.theme === k}"><span class="sw"><i style="background:${t.ink}"></i><i style="background:${t.wall}"></i><i style="background:${t.hot}"></i><i style="background:${t.blush}"></i></span>${t.name}</button>`;
+                }).join('')}</div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Book goal</legend>
+      <p class="note">How many books fill the Books bar.</p>
+      <input id="goal" class="in px" type="number" inputmode="numeric" min="1" max="999" value="${state.goal}" aria-label="Book goal">
+    </fieldset>
+
+    <fieldset>
+      <legend>Shelves</legend>
+      <ul class="shelf-list" id="shelfList">${state.shelves.map((s, i) => `
+        <li class="shelf-row" data-id="${s.id}">
+          <input class="in px" data-name maxlength="30" value="${esc(s.name)}" aria-label="Shelf name">
+          <button type="button" class="btn sm px" data-a="up" ${i === 0 ? 'disabled' : ''} aria-label="Move ${esc(s.name)} up">Up</button>
+          <button type="button" class="btn sm px" data-a="down" ${i === n - 1 ? 'disabled' : ''} aria-label="Move ${esc(s.name)} down">Down</button>
+          <button type="button" class="btn sm px" data-a="del" ${n === 1 ? 'disabled' : ''} aria-label="Delete ${esc(s.name)}">Delete</button>
+        </li>`).join('')}
+      </ul>
+      <button type="button" class="btn px" id="addShelf">Add a shelf</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>Backup</legend>
+      <p class="note">Your library is saved in this browser. Save a copy to keep it safe or move it to another device. Importing replaces what is on your shelves now.</p>
+      <div class="actions">
+        <button type="button" class="btn px" id="exp">Save a copy</button>
+        <label class="btn file px">Import a copy<input type="file" id="imp" accept=".json,application/json"></label>
+      </div>
+    </fieldset>
+
+    <div class="actions"><button type="button" class="btn primary px" data-x>Done</button></div>
+  </div>`;
+
+                body.querySelectorAll('[data-x]').forEach(x => x.addEventListener('click', () => setDlg.close()));
+                if (!setDlg.open) setDlg.showModal();
+            }
+
+            $('#setBody').addEventListener('input', e => {
+                const t = e.target;
+                if (t.id === 'nm') { state.title = t.value.slice(0, 28); persist(); renderTitle(); }
+                else if (t.id === 'goal') { const v = parseInt(t.value, 10); if (!isNaN(v) && v >= 1) { state.goal = Math.min(999, v); persist(); renderStats(); } }
+                else if (t.matches('[data-name]')) {
+                    const sh = state.shelves.find(s => s.id === t.closest('[data-id]').dataset.id);
+                    if (sh) { sh.name = t.value.slice(0, 30) || 'Shelf'; persist(); renderShelves(); }
+                }
+            });
+
+            $('#setBody').addEventListener('click', e => {
+                const th = e.target.closest('[data-theme]');
+                if (th) { state.theme = th.dataset.theme; applyTheme(); persist(); openSettings(); const f = $(`[data-theme="${state.theme}"]`, setDlg); if (f) f.focus(); return; }
+
+                if (e.target.id === 'addShelf') {
+                    state.shelves.push({ id: uid(), name: 'New shelf' }); persist(); renderShelves(); openSettings();
+                    const ins = setDlg.querySelectorAll('[data-name]'); const last = ins[ins.length - 1];
+                    if (last) { last.focus(); last.select(); }
+                    return;
+                }
+
+                const btn = e.target.closest('[data-a]');
+                if (btn) {
+                    const row = btn.closest('[data-id]'), id = row.dataset.id;
+                    const i = state.shelves.findIndex(s => s.id === id);
+                    const a = btn.dataset.a;
+                    if (a === 'up' || a === 'down') {
+                        const j = a === 'up' ? i - 1 : i + 1;
+                        if (j < 0 || j >= state.shelves.length) return;
+                        [state.shelves[i], state.shelves[j]] = [state.shelves[j], state.shelves[i]];
+                        persist(); renderShelves(); openSettings();
+                        const nb = setDlg.querySelector(`[data-id="${id}"] [data-a="${a}"]`);
+                        (nb && !nb.disabled ? nb : setDlg.querySelector(`[data-id="${id}"] [data-name]`)).focus();
+                    } else if (a === 'del') {
+                        if (!btn.dataset.armed) {
+                            btn.dataset.armed = '1'; btn.textContent = 'Sure?';
+                            setTimeout(() => { if (btn.isConnected) { delete btn.dataset.armed; btn.textContent = 'Delete'; } }, 3000);
+                            return;
+                        }
+                        const target = state.shelves[i === 0 ? 1 : i - 1];
+                        const moved = state.books.filter(b => b.shelfId === id);
+                        moved.forEach(b => b.shelfId = target.id);
+                        state.shelves.splice(i, 1);
+                        persist(); render();
+                        openSettings(moved.length ? `Deleted. ${moved.length} book${moved.length === 1 ? '' : 's'} moved to ${target.name}.` : 'Shelf deleted.');
+                    }
+                    return;
+                }
+
+                if (e.target.id === 'exp') {
+                    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob); a.download = 'my-lil-library.json';
+                    document.body.appendChild(a); a.click(); a.remove();
+                    setTimeout(() => URL.revokeObjectURL(a.href), 1500);
+                    $('#setmsg').textContent = 'Copy saved.';
+                }
+            });
+
+            $('#setBody').addEventListener('change', e => {
+                if (e.target.id !== 'imp') return;
+                const f = e.target.files && e.target.files[0];
+                if (!f) return;
+                f.text().then(t => {
+                    const o = JSON.parse(t);
+                    if (!o || !Array.isArray(o.books) || !Array.isArray(o.shelves)) throw new Error('shape');
+                    state = clean(o); applyTheme(); persist(); render();
+                    openSettings(`Imported ${state.books.length} book${state.books.length === 1 ? '' : 's'}.`);
+                }).catch(() => { $('#setmsg').textContent = 'That file is not a library copy.'; });
+            });
+
+            $('#menu').addEventListener('click', () => openSettings());
+
+            /* ---------- full screen ---------- */
+            const fsBtn = $('#fs');
+            fsBtn.innerHTML = pxIcon(IC.expand, 3, FILL);
+            if (!document.documentElement.requestFullscreen) fsBtn.hidden = true;
+            fsBtn.addEventListener('click', () => {
+                if (document.fullscreenElement) document.exitFullscreen();
+                else document.documentElement.requestFullscreen().catch(() => { });
+            });
+
+            /* ---------- go ---------- */
+            applyTheme();
+            render();
+        })();
+    </script>
+</body>
+
+</html>
